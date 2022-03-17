@@ -4,7 +4,8 @@
   "description": "movies actors",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node server.js",
+    "start:dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
