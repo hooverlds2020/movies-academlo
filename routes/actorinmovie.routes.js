@@ -1,17 +1,17 @@
 const express = require('express');
 
 const { 
-    getAllActorinmovie, 
-    getActorinmovieById, 
-    createActorinmovie 
+    getAllActorInMovie, 
+    getActorInMovieById, 
+    createActorInMovie 
 } = require('../controllers/actorinmovie.controller');
 
 const router = express.Router();
 
-router.get('/', getAllActorinmovie);
+router.get('/', getAllActorInMovie);
 
-router.get('/:id', getActorinmovieById);
+router.get('/:id', getActorInMovieById);
 
-router.post('/', createActorinmovie);
+router.post('/', createActorInMovie);
 
 module.exports = { actorinmoviesRouter: router };

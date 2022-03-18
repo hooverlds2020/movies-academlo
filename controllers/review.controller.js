@@ -6,16 +6,12 @@ const { AppError } = require('../utils/appError');
 
 exports.getAllReviews =  catchAsync(async (req, res, next) => {
   
-    const review = await Review.findAll({
+    const reviews = await Review.findAll({
       where: { status: 'active' }
     });
 
-    if (review.length === 0) {
-      res.status(400).json({
-        status: 'error',
-        message: 'There are not reviews until'
-      });
-      return;
+    if (reviews.length === 0) {
+      return next(new AppError(404, 'There are not reviews until'));
     }
 
     res.status(201).json({
@@ -34,10 +30,7 @@ exports.getReviewById = catchAsync(async (req, res, next) => {
     });
 
     if (!review) {
-      res.status(404).json({
-        status: 'error',
-        message: `The id ${id} selected was not found`
-      });
+      return next(new AppError(404, `The id ${id} selected was not found`));
     }
 
     res.status(200).json({

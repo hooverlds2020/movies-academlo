@@ -1,15 +1,15 @@
-const { Actorinmovie } = require('../models/actorinmovie.model');
+const { ActorInMovie } = require('../models/actorinmovie.model');
 
 // Utils
 const { catchAsync } = require('../utils/catchAsync');
 const { AppError } = require('../utils/appError');
 
-exports.getAllActorinmovie = catchAsync(async (req, res, next) => {
-    const actorinmovie = await Actorinmovie.findAll({
+exports.getAllActorInMovie = catchAsync(async (req, res, next) => {
+    const actorInMovie = await ActorInMovie.findAll({
       // where: { status: 'active' }
     });
 
-    if (actorinmovie.length === 0) {
+    if (actorInMovie.length === 0) {
       res.status(400).json({
         status: 'error',
         message: 'There are not users until'
@@ -20,18 +20,18 @@ exports.getAllActorinmovie = catchAsync(async (req, res, next) => {
     res.status(201).json({
       status: 'success',
       data: {
-        actorinmovie
+        actorInMovie
       }
     });
   }) 
 
-exports.getActorinmovieById = catchAsync(async (req, res, next) => {
+exports.getActorInMovieById = catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const actorinmovie = await Actorinmovie.findOne({
+    const actorInMovie = await ActorInMovie.findOne({
       where: { id: id, status: 'active' }
     });
 
-    if (!actorinmovie) {
+    if (!actorInMovie) {
       res.status(404).json({
         status: 'error',
         message: `The id ${id} selected was not found`
@@ -41,12 +41,12 @@ exports.getActorinmovieById = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        actorinmovie
+        actorInMovie
       }
     });
   }) 
 
-exports.createActorinmovie = catchAsync(async (req, res, next) => {
+exports.createActorInMovie = catchAsync(async (req, res, next) => {
     const { actorId, movieId } = req.body;
 
     if (!actorId || !movieId) {
@@ -58,7 +58,7 @@ exports.createActorinmovie = catchAsync(async (req, res, next) => {
       );
     }
 
-    const actorinmovie = await Actorinmovie.create({
+    const actorInMovie = await ActorInMovie.create({
       actorId: actorId,
       movieId: movieId
     });
@@ -66,7 +66,7 @@ exports.createActorinmovie = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        actorinmovie
+        actorInMovie
       }
     });
   }) 
