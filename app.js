@@ -19,6 +19,9 @@ const app = express();
 //import json
 app.use(express.json());
 
+// Enable multipart/form-data incoming data (to receive files)
+app.use(express.urlencoded({ extended: true }));
+
 //endpoints
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/reviews', reviewsRouter);

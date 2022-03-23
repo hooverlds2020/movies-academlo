@@ -1,9 +1,13 @@
+const { ref, uploadBytes } = require('firebase/storage');
+
+//Models
 const { Actor } = require('../models/actor.model');
 
 // Utils
 const { filterObj } = require('../utils/filterObj');
 const { catchAsync } = require('../utils/catchAsync');
 const { AppError } = require('../utils/appError');
+const { storage } = require('../utils/firebase');
 
 exports.getAllActor = catchAsync(async (req, res) => {
   const actor = await Actor.findAll({
@@ -49,12 +53,17 @@ exports.createActor = catchAsync(async (req, res, next) => {
     );
   }
 
+  // Upload img to Cloud Storage (Firebase)
+  const imgRef = ref(storage, `imgs/${Date.now()}-${req.file.originalname}`);
+
+  const result = await uploadBytes(imgRef, req.file.buffer);
+
   const actor = await Actor.create({
     name: name,
     country: country,
     rating: rating,
     age: age,
-    profilePic: profilePic
+    profilePic: result.metadata.fullPath
   });
 
   res.status(200).json({

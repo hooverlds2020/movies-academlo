@@ -26,7 +26,7 @@ const Movie = sequelize.define('movie', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  img: {
+  imgUrl: {
     type: DataTypes.STRING(255),
     allowNull: true
   },
@@ -38,14 +38,6 @@ const Movie = sequelize.define('movie', {
     type: DataTypes.STRING(50),
     allowNull: false,
     defaultValue: 'active'
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  movieId: {
-    type: DataTypes.INTEGER,
-    allowNull: false
   }
 });
 

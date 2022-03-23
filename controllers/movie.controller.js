@@ -1,23 +1,38 @@
+const { ref, uploadBytes } = require('firebase/storage');
+
+//Models
 const { Movie } = require('../models/movie.model');
 
 // Utils
 const { filterObj } = require('../utils/filterObj');
 const { catchAsync } = require('../utils/catchAsync');
 const { AppError } = require('../utils/appError');
+const { storage } = require('../utils/firebase');
 
 exports.getAllMovies = catchAsync(async (req, res, next) => {
+
+  const db = getDatabase();
+  const ref = db.ref('server/saving-data/fireblog/posts');
+  //const ref = db.ref('server/saving-data/fireblog/posts');
+
+  ref.on('value', (snapshot) => {
+    console.log(snapshot.val());
+  }, (errorObject) => {
+    console.log('The read failed: ' + errorObject.name);
+  });
+  
   const movies = await Movie.findAll({
     where: { status: 'active' }
   });
 
   if (movies.length === 0) {
-    return next(new AppError(404, 'There are not users until'));
+    return next(new AppError(404, 'There are not movies until'));
   }
 
   res.status(201).json({
     status: 'success',
     data: {
-      movie
+      movies
     }
   });
 });
@@ -40,34 +55,34 @@ exports.getMovieById = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createMovie = catchAsync(async (req, res) => {
-  const { title, description, duration, rating, img, genre, userId, movieId } =
+exports.createMovie = catchAsync(async (req, res, next) => {
+  const { title, description, duration, rating, genre} =
     req.body;
 
   if (
     !title ||
     !description ||
     !duration ||
-    !rating ||
-    !img ||
-    !genre ||
-    !userId ||
-    !movieId
+    !rating ||  
+    !genre   
   ) {
     return next(
-      new AppError(400, 'Must provide a valid name, email and password')
+      new AppError(400, 'Must provide a valid title, description')
     );
   }
+
+  // Upload img to Cloud Storage (Firebase)
+  const imgRef = ref(storage, `imgs/${Date.now()}-${req.file.originalname}`);
+
+  const result = await uploadBytes(imgRef, req.file.buffer);
 
   const movie = await Movie.create({
     title: title,
     description: description,
     duration: duration,
     rating: rating,
-    img: img,
+    imgUrl: result.metadata.fullPath,
     genre: genre,
-    userId: userId,
-    movieId: movieId
   });
 
   res.status(200).json({
