@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/reviews', reviewsRouter);
 app.use('/api/v1/movies', moviesRouter);
-app.use('/api/v1/actorinmovies', actorinmoviesRouter)
+app.use('/api/v1/actorsinmovies', actorinmoviesRouter)
 app.use('/api/v1/actors', actorsRouter)
 
 app.use('*', (req, res, next) => {

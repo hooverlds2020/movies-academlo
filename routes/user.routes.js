@@ -6,7 +6,8 @@ const {
     createUser,
     updateUserPatch,
     deleteUser,
-    loginUser
+    loginUser,
+    checkToken
  } = require('../controllers/user.controller');
 
 // Middlewares
@@ -16,16 +17,20 @@ const {
 
 const router = express.Router();
 
-router.get('/', validateSession, getAllUsers);
-
-router.get('/:id', validateSession, getUserById);
-
 router.post('/', createUser);
 
-router.patch('/:id', validateSession, updateUserPatch);
-
-router.delete('/:id', validateSession, deleteUser);
-
 router.post('/login', loginUser)
+
+router.use( validateSession )
+
+router.get('/', getAllUsers);
+
+router.get('/check-token', checkToken);
+
+router.get('/:id', getUserById);
+
+router.patch('/:id', updateUserPatch);
+
+router.delete('/:id', deleteUser);
 
 module.exports = { usersRouter: router };

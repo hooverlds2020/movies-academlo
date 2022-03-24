@@ -1,7 +1,8 @@
-const { ref, uploadBytes } = require('firebase/storage');
+const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 
 //Models
 const { Movie } = require('../models/movie.model');
+const { Actor } = require('../models/actor.model');
 
 // Utils
 const { filterObj } = require('../utils/filterObj');
@@ -11,19 +12,51 @@ const { storage } = require('../utils/firebase');
 
 exports.getAllMovies = catchAsync(async (req, res, next) => {
 
-  const db = getDatabase();
-  const ref = db.ref('server/saving-data/fireblog/posts');
-  //const ref = db.ref('server/saving-data/fireblog/posts');
-
-  ref.on('value', (snapshot) => {
-    console.log(snapshot.val());
-  }, (errorObject) => {
-    console.log('The read failed: ' + errorObject.name);
-  });
-  
   const movies = await Movie.findAll({
-    where: { status: 'active' }
+    where: { status: 'active' },
+    include: [
+      {
+      model: Actor,      
+      }       
+    ]
   });
+
+    // Promise[]
+    const moviesPromises = movies.map(
+      async ({
+        id,
+        title,
+        description,
+        duration,
+        rating,
+        imgUrl,
+        genre,
+        createdAt,
+        updatedAt,
+        actors
+      }) => {
+        const imgRef = ref(storage, imgUrl);
+  
+        const imgDownloadUrl = await getDownloadURL(imgRef);
+  
+        return {
+          id,
+          title,
+          description,
+          duration,
+          rating, 
+          imgUrl: imgDownloadUrl,          
+          genre,
+          createdAt,
+          updatedAt,
+          actors,
+        };
+      }
+    );
+  
+    const resolvedMovies = await Promise.all(moviesPromises);
+
+    
 
   if (movies.length === 0) {
     return next(new AppError(404, 'There are not movies until'));
@@ -32,7 +65,7 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
-      movies
+      movies: resolvedMovies
     }
   });
 });
@@ -40,7 +73,10 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
 exports.getMovieById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const movie = await Movie.findOne({
-    where: { id: id, status: 'active' }
+    where: { id: id, status: 'active' },
+    include: [{
+      model: Actor
+    }]
   });
 
   if (!movie) {
@@ -56,13 +92,16 @@ exports.getMovieById = catchAsync(async (req, res, next) => {
 });
 
 exports.createMovie = catchAsync(async (req, res, next) => {
+
+if(("admin") === req.currentUser.role){
+  
   const { title, description, duration, rating, genre} =
     req.body;
 
   if (
-    !title ||
+    !title||
     !description ||
-    !duration ||
+    !duration ||   
     !rating ||  
     !genre   
   ) {
@@ -70,6 +109,8 @@ exports.createMovie = catchAsync(async (req, res, next) => {
       new AppError(400, 'Must provide a valid title, description')
     );
   }
+
+
 
   // Upload img to Cloud Storage (Firebase)
   const imgRef = ref(storage, `imgs/${Date.now()}-${req.file.originalname}`);
@@ -83,14 +124,21 @@ exports.createMovie = catchAsync(async (req, res, next) => {
     rating: rating,
     imgUrl: result.metadata.fullPath,
     genre: genre,
+    userId: req.currentUser.id,
   });
 
-  res.status(200).json({
+  res.status(201).json({
     status: 'success',
     data: {
       movie
     }
   });
+  }else (
+    res.status(404).json({
+      status: 'error',
+      message: 'The user is not define for add movies'
+    })
+  )
 });
 
 exports.updateMoviePatch = catchAsync(async (req, res, next) => {
@@ -101,7 +149,7 @@ exports.updateMoviePatch = catchAsync(async (req, res, next) => {
     'description',
     'duration',
     'rating',
-    'img',
+    'imgUrl',
     'genre'
   ); // { title } | { title, author } | { content }
 

@@ -4,17 +4,20 @@ const dotenv = require('dotenv');
 
 //Models
 const { User } = require('../models/user.model');
+const { Actor } = require('../models/actor.model');
 
 // Utils
 const { filterObj } = require('../utils/filterObj');
 const { catchAsync } = require('../utils/catchAsync');
 const { AppError } = require('../utils/appError');
 
+
 dotenv.config({ path: './config.env' });
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.findAll({
-    where: { status: 'active' }
+    where: { status: 'active' },
+    attributes: { exclude: ['password'] }    
   });
 
   if (users.length === 0) {
@@ -86,7 +89,7 @@ exports.updateUserPatch = catchAsync(async (req, res, next) => {
   const data = filterObj(req.body, 'username', 'email', 'password', 'role'); // { title } | { title, author } | { content }
 
   const user = await User.findOne({
-    where: { id: id, status: 'active' }
+    where: { id: id, status: 'active' },
   });
 
   if (!user) {
@@ -141,4 +144,8 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     status: 'success',
     data: { token }
   });
+});
+
+exports.checkToken = catchAsync(async (req, res, next) => {
+  res.status(200).json({ status: 'success' });
 });

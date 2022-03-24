@@ -7,13 +7,15 @@ const {
     deleteActor, 
 } = require('../controllers/actor.controller');
 
+const { upload } = require('../utils/multer');
+
 const router = express.Router();
 
 router.get('/', getAllActor);
 
 router.get('/:id', getActorById);
 
-router.post('/', createActor);
+router.post('/', upload.single('pictureProfile'), createActor)
 
 router.patch('/:id', updateActorPatch);
 

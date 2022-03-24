@@ -49,6 +49,8 @@ exports.validateSession = catchAsync(
 
     console.log(user);
 
+    req.currentUser = user
+
     // Grant access
     next();
   }
