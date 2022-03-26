@@ -54,13 +54,7 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
       }
     );
   
-    const resolvedMovies = await Promise.all(moviesPromises);
-
-    
-
-  if (movies.length === 0) {
-    return next(new AppError(404, 'There are not movies until'));
-  }
+    const resolvedMovies = await Promise.all(moviesPromises);    
 
   res.status(201).json({
     status: 'success',
@@ -79,10 +73,6 @@ exports.getMovieById = catchAsync(async (req, res, next) => {
     }]
   });
 
-  if (!movie) {
-    return next(new AppError(404, 'User not found'));
-  }
-
   res.status(200).json({
     status: 'success',
     data: {
@@ -93,8 +83,6 @@ exports.getMovieById = catchAsync(async (req, res, next) => {
 
 exports.createMovie = catchAsync(async (req, res, next) => {
 
-if(("admin") === req.currentUser.role){
-  
   const { title, description, duration, rating, genre} =
     req.body;
 
@@ -109,8 +97,6 @@ if(("admin") === req.currentUser.role){
       new AppError(400, 'Must provide a valid title, description')
     );
   }
-
-
 
   // Upload img to Cloud Storage (Firebase)
   const imgRef = ref(storage, `imgs/${Date.now()}-${req.file.originalname}`);
@@ -133,13 +119,7 @@ if(("admin") === req.currentUser.role){
       movie
     }
   });
-  }else (
-    res.status(404).json({
-      status: 'error',
-      message: 'The user is not define for add movies'
-    })
-  )
-});
+ });
 
 exports.updateMoviePatch = catchAsync(async (req, res, next) => {
   const { id } = req.params;
@@ -157,10 +137,6 @@ exports.updateMoviePatch = catchAsync(async (req, res, next) => {
     where: { id: id, status: 'active' }
   });
 
-  if (!movie) {
-    return next(new AppError(404, 'Cant update movie, invalid ID'));
-  }
-
   await movie.update({ ...data }); // .update({ title, author })
 
   res.status(204).json({ status: 'success' });
@@ -172,10 +148,6 @@ exports.deleteMovie = catchAsync(async (req, res, next) => {
   const movie = await Movie.findOne({
     where: { id: id, status: 'active' }
   });
-
-  if (!movie) {
-    return next(new AppError(404, 'Cant delete movie, invalid ID'));
-  }
 
   // Soft delete
   await movie.update({ status: 'deleted' });

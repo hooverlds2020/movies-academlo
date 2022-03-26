@@ -1,4 +1,6 @@
 const express = require('express');
+const { body } = require('express-validator')
+
 const { 
     getAllActor, 
     getActorById, 
@@ -7,18 +9,36 @@ const {
     deleteActor, 
 } = require('../controllers/actor.controller');
 
+const { actorExists } = require('../middlewares/actor.middleware');
+const { validateSession } = require('../middlewares/auth.middleware');
+
 const { upload } = require('../utils/multer');
 
-const router = express.Router();
+const router = express.Router()
 
-router.get('/', getAllActor);
+router.use(validateSession)
 
-router.get('/:id', getActorById);
+router
+    .get('/', getAllActor)
+    .post('/', upload.single('pictureProfile'), 
+    [
+        body('name').isString().notEmpty(),
+        body('country').isString().notEmpty(),
+        body('rating')
+        .isNumeric()
+        .custom((value) => value > 0 && value <= 5),
+        body('age')
+        .isNumeric()
+        .custom((value) => value > 0)
+    ],
+    createActor)
 
-router.post('/', upload.single('pictureProfile'), createActor)
 
-router.patch('/:id', updateActorPatch);
-
-router.delete('/:id', deleteActor)
+router
+    .use('/:id', actorExists)
+    .route('/:id')
+    .get(getActorById)
+    .patch(updateActorPatch)
+    .delete(deleteActor)
 
 module.exports = { actorsRouter: router };

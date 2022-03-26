@@ -11,26 +11,24 @@ const {
 } = require('../controllers/movie.controller');
 
 // Middlewares
-const { validateSession } = require('../middlewares/auth.middleware');
+const { validateSession, protectAdmin } = require('../middlewares/auth.middleware');
+const { movieExists } = require('../middlewares/movie.middleware');
 
 //Utils
 const { upload } = require('../utils/multer');
 
 const router = express.Router();
 
-router.get('/', getAllMovies);
+router.use(validateSession)
 
-// GET http://localhost:4000/movies/:id
-router.get('/:id', getMovieById);
+router
+    .get('/', getAllMovies)
+    .post('/', protectAdmin, upload.single('imgUrl'), createMovie)
 
-// POST http://localhost:4000/movies
-router.post('/', upload.single('imgUrl'), validateSession, createMovie);
-
-// PATCH http://localhost:4000/movies/:id
-router.patch('/:id', updateMoviePatch);
-
-// DELETE http://localhost:4000/movies/:id
-router.delete('/:id', deleteMovie);
+router
+    .use('/:id', movieExists)
+    .route('/:id').get(getMovieById)
+    .patch(updateMoviePatch)
+    .delete(deleteMovie)
 
 module.exports = { moviesRouter: router };
-// module.exports = router // export default router
