@@ -11,7 +11,6 @@ const { AppError } = require('../utils/appError');
 const { storage } = require('../utils/firebase');
 
 exports.getAllActor = catchAsync(async (req, res) => {
-  
   const actor = await Actor.findAll({
     where: { status: 'active' },
     include: [{ model: Movie }]
@@ -65,7 +64,7 @@ exports.getActorById = catchAsync(async (req, res, next) => {
   //   include: [{ model: Movie }]
   // });
 
-  const { actor } = req
+  const { actor } = req;
 
   res.status(200).json({
     status: 'success',
@@ -82,41 +81,36 @@ exports.createActor = catchAsync(async (req, res, next) => {
   //   return next(new AppError(400, 'Must provide a valid name, country'));
   // }
 
-  // Upload img to Cloud Storage (Firebase)
-  const imgRef = ref(storage, `imgs/${Date.now()}-${req.file.originalname}`);
+  // Upload img to firebase
+  const fileExtension = req.file.originalname.split('.')[1];
 
-  const result = await uploadBytes(imgRef, req.file.buffer);
+  const imgRef = ref(
+    storage,
+    `imgs/actors/${name}-${Date.now()}.${fileExtension}`
+  );
 
-  const actor = await Actor.create({
+  const imgUploaded = await uploadBytes(imgRef, req.file.buffer);
+
+  const newActor = await Actor.create({
     name: name,
     country: country,
     rating: rating,
     age: age,
-    profilePic: result.metadata.fullPath
+    profilePic: imgUploaded.metadata.fullPath
   });
 
   res.status(200).json({
     status: 'success',
     data: {
-      actor
+      newActor
     }
   });
 });
 
 exports.updateActorPatch = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const data = filterObj(
-    req.body,
-    'name',
-    'country',
-    'rating',
-    'age',
-    'profilePic'
-  ); // { title } | { title, author } | { content }
+  const { actor } = req;
 
-  const actor = await Actor.findOne({
-    where: { id: id, status: 'active' }
-  });
+  const data = filterObj(req.body, 'name', 'country', 'rating', 'age');
 
   await actor.update({ ...data }); // .update({ title, author })
 
@@ -124,14 +118,11 @@ exports.updateActorPatch = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteActor = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  const actor = await Actor.findOne({
-    where: { id: id, status: 'active' }
-  });
+  const { actor } = req;
 
   // Soft delete
   await actor.update({ status: 'deleted' });
 
   res.status(204).json({ status: 'success' });
 });
+

@@ -99,7 +99,7 @@ exports.updateUserPatch = catchAsync(async (req, res, next) => {
 
 exports.deleteUser = catchAsync(async (req, res, next) => {
   const { user } = req;
-  
+
   // Soft delete
   await user.update({ status: 'deleted' });
 

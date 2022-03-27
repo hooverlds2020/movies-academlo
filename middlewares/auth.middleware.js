@@ -8,7 +8,6 @@ const { User } = require('../models/user.model');
 // Utils
 const { AppError } = require('../utils/appError');
 const { catchAsync } = require('../utils/catchAsync');
-const { async } = require('@firebase/util');
 
 dotenv.config({ path: './config.env' });
 

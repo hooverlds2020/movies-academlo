@@ -18,7 +18,8 @@ exports.actorExists = catchAsync(async (req, res, next) => {
   if (!actor) {
     return next(new AppError(404, 'Actor not found with given id'));
   }
-
+  
   req.actor = actor;
   next();
 });
+
