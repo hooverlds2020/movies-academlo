@@ -3,6 +3,7 @@ const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 //Models
 const { Actor } = require('../models/actor.model');
 const { Movie } = require('../models/movie.model');
+const { ActorInMovie } = require('../models/actorInMovie.model');
 
 // Utils
 const { filterObj } = require('../utils/filterObj');
@@ -13,14 +14,14 @@ const { storage } = require('../utils/firebase');
 exports.getAllActor = catchAsync(async (req, res) => {
   const actor = await Actor.findAll({
     where: { status: 'active' },
-    include: [{ model: Movie }]
+    include: [{ model: Movie, through: ActorInMovie }],
   });
 
   // Promise[]
-  const actorsPromises = actor.map(
+const actorsPromises = actor.map(
     async ({
       id,
-      title,
+      name,
       country,
       rating,
       profilePic,
@@ -35,7 +36,7 @@ exports.getAllActor = catchAsync(async (req, res) => {
 
       return {
         id,
-        title,
+        name,
         country,
         rating,
         profilePic: imgDownloadUrl,
@@ -58,12 +59,6 @@ exports.getAllActor = catchAsync(async (req, res) => {
 });
 
 exports.getActorById = catchAsync(async (req, res, next) => {
-  // const { id } = req.params;
-  // const actor = await Actor.findOne({
-  //   where: { id: id, status: 'active' },
-  //   include: [{ model: Movie }]
-  // });
-
   const { actor } = req;
 
   res.status(200).json({
@@ -76,10 +71,6 @@ exports.getActorById = catchAsync(async (req, res, next) => {
 
 exports.createActor = catchAsync(async (req, res, next) => {
   const { name, country, rating, age } = req.body;
-
-  // if (!name || !country || !rating || !age) {
-  //   return next(new AppError(400, 'Must provide a valid name, country'));
-  // }
 
   // Upload img to firebase
   const fileExtension = req.file.originalname.split('.')[1];
@@ -125,4 +116,3 @@ exports.deleteActor = catchAsync(async (req, res, next) => {
 
   res.status(204).json({ status: 'success' });
 });
-

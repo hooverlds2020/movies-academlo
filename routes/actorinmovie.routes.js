@@ -1,9 +1,9 @@
 const express = require('express');
 
-const { 
-    getAllActorInMovie, 
-    getActorInMovieById, 
-    createActorInMovie 
+const {
+  getAllActorInMovie,
+  getActorInMovieById,
+  createActorInMovie
 } = require('../controllers/actorinmovie.controller');
 
 const router = express.Router();

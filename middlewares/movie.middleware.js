@@ -1,4 +1,5 @@
 // Models
+const { Actor } = require('../models/actor.model');
 const { Movie } = require('../models/movie.model');
 
 // Utils
@@ -6,11 +7,10 @@ const { AppError } = require('../utils/appError');
 const { catchAsync } = require('../utils/catchAsync');
 
 exports.movieExists = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
   const movie = await Movie.findOne({
     attributes: { exclude: ['password'] },
-    where: { id, status: 'active' }
+    where: { status: 'active' },
+    include: [{ model: Actor }]
   });
 
   if (!movie) {

@@ -10,7 +10,6 @@ exports.actorExists = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const actor = await Actor.findOne({
-    attributes: { exclude: ['password'] },
     where: { id, status: 'active' },
     include: [{ model: Movie }]
   });
@@ -18,8 +17,7 @@ exports.actorExists = catchAsync(async (req, res, next) => {
   if (!actor) {
     return next(new AppError(404, 'Actor not found with given id'));
   }
-  
+
   req.actor = actor;
   next();
 });
-

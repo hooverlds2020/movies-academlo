@@ -16,24 +16,24 @@ const {
   protectAdmin
 } = require('../middlewares/auth.middleware');
 
-const { userExists, protectAccountOwner } = require('../middlewares/user.middleware');
+const {
+  userExists,
+  protectAccountOwner
+} = require('../middlewares/user.middleware');
 
 const router = express.Router();
 
-router
-  .post('/', createUser)
-  .post('/login', loginUser)
+router.post('/', createUser).post('/login', loginUser);
 
 router.use(validateSession);
 
-router
-  .get('/', protectAdmin, getAllUsers)
-  .get('/check-token', checkToken);
+router.get('/', protectAdmin, getAllUsers).get('/check-token', checkToken);
 
-router.use('/:id', userExists)
+router
+  .use('/:id', userExists)
   .route('/:id')
   .get(getUserById)
   .patch(protectAccountOwner, updateUserPatch)
-  .delete(deleteUser)
+  .delete(deleteUser);
 
 module.exports = { usersRouter: router };

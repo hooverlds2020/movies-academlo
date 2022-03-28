@@ -5,7 +5,7 @@ const { globalErrorHandler } = require('./controllers/error.controller')
 
 //Routes
 const { usersRouter } = require('./routes/user.routes');
-const { reviewsRouter } = require('./routes/review.routes');
+// const { reviewsRouter } = require('./routes/review.routes');
 const { moviesRouter } = require('./routes/movie.routes')
 const { actorinmoviesRouter } = require('./routes/actorinmovie.routes');
 const { actorsRouter } = require('./routes/actor.routes');
@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 //endpoints
 app.use('/api/v1/users', usersRouter);
-app.use('/api/v1/reviews', reviewsRouter);
+// app.use('/api/v1/reviews', reviewsRouter);
 app.use('/api/v1/movies', moviesRouter);
 app.use('/api/v1/actorsinmovies', actorinmoviesRouter)
 app.use('/api/v1/actors', actorsRouter)

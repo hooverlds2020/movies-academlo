@@ -3,6 +3,7 @@ const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 //Models
 const { Movie } = require('../models/movie.model');
 const { Actor } = require('../models/actor.model');
+const { ActorInMovie } = require('../models/actorInMovie.model');
 
 // Utils
 const { filterObj } = require('../utils/filterObj');
@@ -13,11 +14,8 @@ const { storage } = require('../utils/firebase');
 exports.getAllMovies = catchAsync(async (req, res, next) => {
   const movies = await Movie.findAll({
     where: { status: 'active' },
-    include: [
-      {
-        model: Actor
-      }
-    ]
+    include: [{ model: Actor }],
+   
   });
 
   // Promise[]
@@ -32,7 +30,8 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
       genre,
       createdAt,
       updatedAt,
-      actors
+      actors,
+      reviews
     }) => {
       const imgRef = ref(storage, imgUrl);
 
@@ -48,7 +47,8 @@ exports.getAllMovies = catchAsync(async (req, res, next) => {
         genre,
         createdAt,
         updatedAt,
-        actors
+        actors, 
+        reviews
       };
     }
   );
@@ -95,6 +95,13 @@ exports.createMovie = catchAsync(async (req, res, next) => {
     imgUrl: imgUploaded.metadata.fullPath,
     genre
   });
+
+  const actorsInMoviesPromises = actors.map(async (actorId) => {
+    // Assign actors to newly created movie
+    return await ActorInMovie.create({ actorId, movieId: newMovie.id });
+  });
+
+  await Promise.all(actorsInMoviesPromises);
 
   res.status(201).json({
     status: 'success',
